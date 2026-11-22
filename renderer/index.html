@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:">
+<title>AlphaSim</title><link rel="stylesheet" href="styles.css"></head>
+<body>
+<aside class="side">
+  <button id="navx" title="Hide menu">&laquo;</button><div class="logo"><img src="logo.png" alt="AlphaSim"></div>
+  <button id="newsess" class="pri wide">+ New session</button>
+  <nav>
+    <a data-page="dash" class="on">Dashboard</a><a data-page="log">Trade log</a><a data-page="detail">Trade details</a><a data-page="reports">Reports</a>
+    <a data-page="cal">Calendar</a><a data-page="sim">Backtesting</a><a data-page="play">Playbook</a><a data-page="note">Notebook</a><a data-page="data">Data center</a>
+  </nav>
+  <button id="themebtn" class="ghost">Dark theme</button>
+  <div class="mode" id="mode"></div>
+</aside>
+<main>
+<div id="filters" class="row filters"><span class="dim">Filters</span><input type="date" id="ffrom" title="From"><input type="date" id="fto" title="To"><select id="fsym"></select><select id="fstrat"></select><select id="fsess"></select><select id="facc"></select><button id="fclear">Clear</button></div>
+<section id="dash" class="page on"><h1>Dashboard</h1>
+  <div class="kpis" id="kpis"></div>
+  <div class="grid2"><div><div class="card"><h3>Daily net cumulative P&L</h3><div id="dashChart"></div></div>
+    <div class="card"><h3>AlphaSim score</h3><div id="dashScore"></div></div>
+    <div class="card"><h3>Recent trades</h3><table id="dashRecent"></table></div></div>
+  <div><div class="card" id="dashCal"></div><div class="card"><h3>Streaks and days</h3><div id="dashExtra"></div></div></div></div></section>
+
+<section id="log" class="page"><h1>Trade log</h1>
+  <div class="row filt"><input id="lq" placeholder="Search symbol, strategy, tag"><select id="lo"><option value="">All outcomes</option><option value="w">Winners</option><option value="l">Losers</option></select>
+  <select id="ld"><option value="">Buy and sell</option><option value="1">Buy</option><option value="-1">Sell</option></select><span class="grow"></span><button id="lexp">Export CSV</button></div>
+  <div class="card"><table id="logTable"></table></div></section>
+
+<section id="detail" class="page"><h1>Trade details</h1>
+  <div class="dgrid"><div class="card" id="dstats"></div><div class="card dchartcard"><div id="dmsg" class="dim"></div><div id="dchart"></div><canvas id="dov"></canvas></div></div></section>
+
+<section id="reports" class="page"><div class="row"><h1 class="grow">Reports</h1><button id="rexp">Export CSV</button></div>
+  <div class="kpis" id="repStats"></div><div class="card"><h3>Cumulative P&L</h3><div id="repChart"></div></div><div class="grid3" id="repBars"></div></section>
+
+<section id="cal" class="page"><h1>Calendar</h1><div class="card" id="calPage"></div></section>
+
+<section id="sim" class="page"><div class="tv">
+  <div class="tvtop">
+    <button class="ic" id="navopen" data-ic="menu" title="Show or hide the menu"></button>
+    <button class="tb" id="symbtn" data-ic="search"><b id="symname">Symbol</b></button>
+    <span class="sep"></span><span id="tfbar"></span><span class="sep"></span>
+    <button class="tb" id="typebtn" data-pm="1">Candles</button>
+    <button class="tb" id="indbtn" data-ic="ind" data-t="Indicators" data-pm="1"></button>
+    <button class="tb" id="c2btn" data-ic="layout" data-t="Layout" data-pm="1"></button>
+    <span class="sep"></span>
+    <button class="ic" id="undo" data-ic="undo" title="Undo (Ctrl+Z)"></button><button class="ic" id="redo" data-ic="redo" title="Redo (Ctrl+Y)"></button>
+    <span class="sep"></span>
+    <button class="tb" id="replaybtn" data-ic="replay" data-t="Replay"></button>
+    <span class="grow"></span>
+    <button class="ic" id="setbtn" data-ic="gear" title="Settings"></button><button class="ic" id="snapbtn" data-ic="cam" title="Save chart image"></button><button class="ic" id="fsbtn" data-ic="full" title="Full screen"></button>
+    <span class="sep"></span><button class="tb" id="openm">Open</button><button class="tb pri" id="savem">Save</button>
+    <button class="ic" id="ordtog" data-ic="panel" title="Show or hide the trading panel"></button>
+  </div>
+  <div class="tvmain">
+    <div class="tvleft" id="leftbar"><div id="tools"></div><input type="color" id="dcolor" value="#2962ff" title="Drawing color"><button class="ic" id="toolx" title="Hide toolbar" data-ic="chevl" data-s="14"></button></div>
+    <div id="chartarea">
+      <div class="chartwrap" id="wrap1"><div id="chart"></div><canvas id="ov"></canvas>
+        <div id="legend"><div id="lgd"></div><div id="inds"></div></div>
+        <input id="textin" placeholder="Type text, press Enter">
+        <div id="empty"><div><b>Start a replay</b><p>Choose a symbol, then pick the date to start from.</p><button class="tb pri" id="emptysym">Choose symbol</button> <button class="tb" id="emptydata">Open Data center</button></div></div>
+        <div id="scalebar"><button id="sc_pct" title="Percentage scale">%</button><button id="sc_log" title="Logarithmic scale">log</button><button id="sc_auto" title="Auto-fit the price scale (also: double-click the price axis)">auto</button></div>
+        <button id="jump" title="Jump to the latest candle (End)">Latest &#9654;</button>
+        <div id="replaybar"><button id="rpdate" data-ic="cal" title="Select start date"></button><span class="sep"></span><button id="back" data-ic="stepb" title="Step back (Left arrow)"></button><button id="play" title="Play / pause (Space)">&#9654;</button><button id="step" data-ic="stepf" title="Next candle (Right arrow)"></button>
+          <select id="speed" title="Replay speed"><option value="1">1x</option><option value="10" selected>10x</option><option value="30">30x</option><option value="60">60x</option><option value="300">300x</option></select><span class="sep"></span><span id="clock"></span><button id="rpexit" title="Close replay bar">&#10005;</button></div>
+      </div>
+      <div class="chartwrap" id="wrap2" style="display:none"><div id="chart2"></div></div>
+    </div>
+    <div class="order" id="orderpanel">
+      <div class="ohead"><b>Trading panel</b><span class="grow"></span><button class="ic" id="ordx" data-ic="chevr" data-s="14" title="Hide panel"></button></div>
+      <div class="two"><button id="sell" class="sell"><small>SELL</small><span id="bid">-</span></button><button id="buy" class="buy"><small>BUY</small><span id="ask">-</span></button></div>
+      <div class="two"><label>Order type<select id="otype"><option value="market">Market</option><option value="limit">Limit</option><option value="stop">Stop</option></select></label><label>Price<input id="oprice" type="number" step="any" style="display:none"></label></div>
+      <label>Strategy<select id="strat"></select></label>
+      <div class="two"><label>Size<select id="smode"><option value="lots">Lots</option><option value="risk">Risk %</option></select></label><label>Amount<input id="lots" type="number" value="0.10" step="0.01" min="0.01"></label></div>
+      <div class="two"><label>SL (pips)<input id="sl" type="number" value="20" min="0"></label><label>TP (pips)<input id="tp" type="number" value="40" min="0"></label></div>
+      <label>Trailing stop (pips, 0 = off)<input id="trail" type="number" value="0" min="0"></label>
+      <p class="dim small">Shortcuts: B buy, S sell, Space play, arrows step.</p>
+    </div>
+  </div>
+  <div class="tvbottom" id="bottom">
+    <div class="tabs"><a data-bt="pos" class="on">Positions <i id="npos">0</i></a><a data-bt="hist">History</a><a data-bt="acct">Account</a><span class="grow"></span><button class="ic" id="botx" data-ic="chevd" data-s="14" title="Hide panel"></button></div>
+    <div class="btab on" id="bt_pos"><div id="open"></div></div>
+    <div class="btab" id="bt_hist"><table id="hist"></table></div>
+    <div class="btab" id="bt_acct"><div class="acctgrid"><div><small>Balance</small><b id="bal"></b></div><div><small>Equity</small><b id="eq"></b></div><div><small>Floating P&amp;L</small><b id="fl"></b></div><div><small>Margin used</small><b id="mg"></b></div><div><small>Free margin</small><b id="fm"></b></div><div><small>Margin level</small><b id="ml"></b></div></div></div>
+  </div>
+  <button class="edge" id="tabL" title="Show toolbar" data-ic="chevr" data-s="14"></button><button class="edge" id="tabR" title="Show trading panel" data-ic="chevl" data-s="14"></button><button class="edge" id="tabB" title="Show positions" data-ic="chevu" data-s="14"></button>
+</div>
+<select id="tf" style="display:none"><option value="60">1m</option><option value="300">5m</option><option value="900">15m</option><option value="1800">30m</option><option value="3600">1h</option><option value="14400">4h</option><option value="86400">1D</option></select>
+<select id="tf2" style="display:none"><option value="0">off</option><option value="60">1m</option><option value="300">5m</option><option value="900">15m</option><option value="1800">30m</option><option value="3600">1h</option><option value="14400">4h</option><option value="86400">1D</option></select>
+<div class="modal" id="m_sym"><div class="mbox"><div class="mhead"><b>Symbol search</b><button class="mclose">&#10005;</button></div><div class="mbody"><input id="symq" placeholder="Search symbol, for example EURUSD"><div id="symlist"></div></div></div></div>
+<div class="modal" id="m_replay"><div class="mbox"><div class="mhead"><b>Start replay</b><button class="mclose">&#10005;</button></div><div class="mbody">
+  <div class="row"><span class="dim">Symbol</span><b id="rsym"></b><button id="rchange">Change</button></div>
+  <label>Start date<input type="date" id="rdate"></label><label>Time (UTC)<input type="time" id="rtime" value="00:00"></label><div class="dim" id="rinfo"></div>
+  <button class="pri" id="rstart">Start replay</button></div></div></div>
+<div class="modal" id="m_set"><div class="mbox"><div class="mhead"><b>Settings</b><button class="mclose">&#10005;</button></div><div class="mbody">
+  <h4>Account (applies when a replay starts)</h4>
+  <label>Starting balance<input id="set_bal" type="number" value="10000"></label><label>Leverage 1:<input id="set_lev" type="number" value="100"></label><label>Commission per lot (USD)<input id="set_comm" type="number" value="0" step="0.5"></label>
+  <h4>Replay data</h4><label>Days of data loaded ahead<input id="set_win" type="number" value="7" min="1" max="60"></label>
+  <h4>Appearance</h4><label>Theme<select id="set_theme"><option value="light">Light</option><option value="dark">Dark</option></select></label>
+  <div class="two"><label>Up candle<input type="color" id="set_up" value="#089981"></label><label>Down candle<input type="color" id="set_dn" value="#f23645"></label></div>
+  <label class="chk"><input type="checkbox" id="set_grid" checked> Show grid lines</label></div></div></div>
+<div class="modal" id="m_save"><div class="mbox"><div class="mhead"><b>Save session</b><button class="mclose">&#10005;</button></div><div class="mbody">
+  <label>Session name<input id="simname" placeholder="For example EURUSD London open"></label><label>Account<input id="simacc" list="acclist" placeholder="Optional"><datalist id="acclist"></datalist></label><button class="pri" id="save">Save</button></div></div></div>
+<div class="modal" id="m_open"><div class="mbox"><div class="mhead"><b>Open session</b><button class="mclose">&#10005;</button></div><div class="mbody">
+  <select id="savedsel" size="8"></select><div class="row"><button class="pri" id="openbtn">Open</button><button id="delbtn">Delete</button></div></div></div></div>
+</section>
+
+<section id="play" class="page"><h1>Playbook</h1>
+  <div class="card"><div class="row"><input id="pname" placeholder="Playbook name"><input id="pdesc" class="grow" placeholder="Description"><select id="ptpl"></select><button id="padd" class="pri">Create playbook</button><button id="pimp">Import</button></div>
+    <textarea id="prules" placeholder="Rules, one per line (they become a checklist in Trade details)"></textarea></div>
+  <div class="grid3" id="playGrid"></div></section>
+
+<section id="note" class="page"><h1>Notebook</h1>
+  <div class="notewrap"><div class="card" id="folders"></div>
+    <div class="card"><div class="row"><input id="nsearch" class="grow" placeholder="Search notes and tags"><select id="ntpl"></select><button id="nnew" class="pri">New note</button></div><div id="noteList"></div></div>
+    <div class="card" id="editor"><div class="row"><input id="ntitle" class="grow ttl" placeholder="Title"><select id="nfold"></select><button id="ndel">Delete</button><button id="nrest">Restore</button></div>
+      <div class="row" style="margin-top:8px"><input id="ntags" class="grow" placeholder="Tags, comma separated"></div>
+      <div class="tb"><button data-cmd="bold"><b>B</b></button><button data-cmd="italic"><i>I</i></button><button data-cmd="underline"><u>U</u></button><button data-cmd="insertUnorderedList">List</button><button data-cmd="insertOrderedList">1.</button><button id="nimg">Image</button></div>
+      <div id="nbody" contenteditable="true"></div></div></div></section>
+
+<section id="data" class="page"><h1>Data center</h1>
+  <div class="card"><h3>Download tick data (CSV)</h3>
+    <div class="row"><select id="dprov"><option value="dukascopy">Dukascopy</option><option value="histdata">HistData</option><option value="truefx">TrueFX (import only)</option></select>
+    <input id="dsym" list="syms" value="EURUSD"><datalist id="syms"><option>EURUSD<option>GBPUSD<option>USDJPY<option>AUDUSD<option>USDCAD<option>USDCHF<option>NZDUSD<option>EURJPY<option>GBPJPY<option>XAUUSD</datalist>
+    <input type="date" id="dfrom"><input type="date" id="dto"><button id="dgo" class="pri">Download</button><button id="dstop">Stop</button><button id="dgap">Check gaps</button><button id="dexp">Export ticks to CSV</button></div>
+    <div class="prog"><i id="pbar"></i></div><div class="dim" id="pmsg">Downloads need internet. Finished files are kept, so a stopped download continues where it left off.</div><div id="gapout"></div>
+    <div class="row" style="margin-top:12px"><span class="dim">Saved to</span><b id="ddir" class="grow"></b><button id="dchg">Change folder</button><button id="dopen">Open folder</button></div></div>
+  <div class="card"><h3>Downloaded files</h3>
+    <div class="row" style="margin-bottom:10px"><span class="dim">Import range (optional)</span><input type="date" id="ifrom"><input type="date" id="ito"><span class="grow"></span>
+      <button id="dimp">Import tick files</button><span class="dim">Candles spread (pips)</span><input id="dspread" type="number" value="1" step="0.1" style="width:70px"><button id="dohlc">Import candle CSV</button></div>
+    <table id="ftable"></table></div>
+  <div class="card"><h3>Ready for Backtesting</h3><table id="dtable"></table></div>
+  <div class="card"><h3>License</h3><p id="ltxt"></p>
+  <div class="row"><input id="lkey" placeholder="ALPHA-XXXX-XXXX-XXXX"><button id="lgo" class="pri">Activate</button></div><div id="lmsg" class="dim"></div></div></section>
+</main>
+<button id="tabN" title="Show menu">&raquo;</button><div id="toast"></div>
+<script src="diag.js"></script>
+<script src="../node_modules/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
+<script src="engine.js"></script><script src="app.js"></script><script src="sim.js"></script><script src="tv.js"></script><script src="pages.js"></script>
+</body></html>
