@@ -1,0 +1,21 @@
+name: Build AlphaSim (Windows 7, 32-bit portable)
+on:
+  workflow_dispatch:
+jobs:
+  build:
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm install
+      - run: npm install --no-save electron@22.3.27
+      - run: npx electron-builder --win portable --ia32 --publish never --config.electronVersion=22.3.27 --config.portable.artifactName=AlphaSim-win7-32bit-portable.exe
+      - uses: actions/upload-artifact@v4
+        with:
+          name: AlphaSim-win7-32bit-portable
+          path: dist/*.exe
